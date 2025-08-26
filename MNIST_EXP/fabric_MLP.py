@@ -11,7 +11,7 @@ from lightning.fabric import Fabric, seed_everything
 from torchmetrics.classification import Accuracy
 
 # Path setup
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+current_dir = "" ## specify the current directory path here
 arch_dir = os.path.join(current_dir, "network_arch")
 result_dir = os.path.join(current_dir, "Trained_models")
 sys.path.append(arch_dir)
@@ -111,7 +111,7 @@ def main():
     evaluate(fabric, model, test_loader)
 
     # Save trained model
-    save_path = os.path.join(result_dir, "MNIST/mnist_mlp_100.pt")
+    save_path = os.path.join(result_dir, "mnist_mlp_100.pt")
     torch.save(model.state_dict(), save_path)
     print(f"Model saved to {save_path}")
 
