@@ -11,7 +11,7 @@ from lightning.fabric import Fabric, seed_everything
 from torchmetrics.classification import Accuracy
 
 # Set directory paths
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+current_dir = "" ## set the path of your current directory
 arch_dir = os.path.join(current_dir, "network_arch")
 result_dir = os.path.join(current_dir, "Trained_models")
 sys.path.append(arch_dir)
@@ -80,12 +80,12 @@ def main():
     gamma = [1, 1]
     hidden_dim = 500
     student_model = TEMP_Network_hybrid_nobn(in_features=784, num_layers=2, num_hidden_list=[hidden_dim, 10], gamma=gamma)
-    student_ckpt = os.path.join(result_dir, "MNIST/mnist_kk_5001.pt")
+    student_ckpt = os.path.join(result_dir, "MNIST/mnist_kk_500.pt")
     student_model.load_state_dict(torch.load(student_ckpt))
 
     # Load teacher model with pretrained weights
     teacher_model = TEMP_Network_hybrid_nobn(in_features=784, num_layers=2, num_hidden_list=[hidden_dim, 10])
-    teacher_ckpt = os.path.join(result_dir, "MNIST/mnist_mlp_500.pt")
+    teacher_ckpt = os.path.join(result_dir, "mnist_mlp_500.pt")
     teacher_model.load_state_dict(torch.load(teacher_ckpt))
 
     # Optimizer setup
@@ -130,7 +130,7 @@ def main():
         # Save best model
         if test_acc > best_acc:
             best_acc = test_acc
-            save_path = os.path.join(result_dir, "MNIST/mnist_kk_500_1.pt")
+            save_path = os.path.join(result_dir, "mnist_kk_500.pt")
             torch.save(student_model.state_dict(), save_path)
 
     # Training summary
