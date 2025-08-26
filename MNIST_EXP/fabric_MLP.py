@@ -25,7 +25,7 @@ torch.manual_seed(3407)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Import TEMP model
-from TEMP_MLP import TEMP_Network_hybrid_nobn
+from PI2_MLP import TEMP_Network_hybrid_nobn
 
 def evaluate(fabric, model, dataloader):
     """
