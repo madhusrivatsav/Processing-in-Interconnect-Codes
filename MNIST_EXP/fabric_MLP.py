@@ -70,7 +70,7 @@ def main():
     train_loader, test_loader, val_loader = fabric.setup_dataloaders(train_loader, test_loader, val_loader)
 
     # Initialize TEMP model (no batch norm)
-    model = TEMP_Network_hybrid_nobn(in_features=784, num_layers=2, num_hidden_list=[100, 10])
+    model = TEMP_Network_hybrid_nobn(in_features=784, num_layers=2, num_hidden_list=[500, 10])
 
     # Training hyperparameters
     epochs = 30
@@ -111,7 +111,7 @@ def main():
     evaluate(fabric, model, test_loader)
 
     # Save trained model
-    save_path = os.path.join(result_dir, "MNIST/mnist_mlp_100.pt")
+    save_path = os.path.join(result_dir, "MNIST/mnist_mlp_500.pt")
     torch.save(model.state_dict(), save_path)
     print(f"Model saved to {save_path}")
 
