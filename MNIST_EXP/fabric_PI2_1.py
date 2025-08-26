@@ -85,7 +85,7 @@ def main():
 
     # Load teacher model with pretrained weights
     teacher_model = TEMP_Network_hybrid_nobn(in_features=784, num_layers=2, num_hidden_list=[hidden_dim, 10])
-    teacher_ckpt = os.path.join(result_dir, "mnist_mlp_500.pt")
+    teacher_ckpt = os.path.join(result_dir, "MNIST/mnist_mlp_500.pt")
     teacher_model.load_state_dict(torch.load(teacher_ckpt))
 
     # Optimizer setup
@@ -130,7 +130,7 @@ def main():
         # Save best model
         if test_acc > best_acc:
             best_acc = test_acc
-            save_path = os.path.join(result_dir, "mnist_kk_500.pt")
+            save_path = os.path.join(result_dir, "MNIST/mnist_kk_500.pt")
             torch.save(student_model.state_dict(), save_path)
 
     # Training summary
