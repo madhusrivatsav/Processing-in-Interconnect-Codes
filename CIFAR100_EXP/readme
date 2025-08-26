@@ -1,1 +1,9 @@
+This directory contains training and evaluation scripts for CIFAR-100 using a ResNet-9 backbone. We provide both a conventional MAC baseline and a π² version.
+Training_teacher.py
+Trains a conventional ResNet-9 on CIFAR-100 (baseline/teacher).
 
+pi_2_train.py
+Trains a π² ResNet-9 (TEMP layers replacing MAC ops) on CIFAR-100.
+
+pi_2_inf1.py
+Runs inference/evaluation on a saved π² ResNet-9 checkpoint.
