@@ -12,7 +12,7 @@ from lightning.fabric import Fabric, seed_everything
 from torchmetrics.classification import Accuracy
 
 # Paths setup
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+current_dir = "" ##specify path of your current directory 
 arch_dir = os.path.join(current_dir, 'network_arch')
 result_dir = os.path.join(current_dir, 'Trained_models')
 sys.path.append(arch_dir)
@@ -139,7 +139,7 @@ def main():
         # Save best model
         if test_acc > best_acc:
             best_acc = test_acc
-            save_path = os.path.join(result_dir, "MNIST/mnist_kk_5001.pt")
+            save_path = os.path.join(result_dir, "MNIST/mnist_kk_500.pt")
             torch.save(student_model.state_dict(), save_path)
 
     total_time = (time.time() - start_time) / 60
