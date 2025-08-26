@@ -11,7 +11,7 @@ from lightning.fabric import Fabric, seed_everything
 from torchmetrics.classification import Accuracy
 
 # ────────────── Path Setup ──────────────
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+current_dir = "" #path to current directory
 arch_dir = os.path.join(current_dir, 'network_arch')
 result_dir = os.path.join(current_dir, 'Trained_models')
 sys.path.append(arch_dir)
