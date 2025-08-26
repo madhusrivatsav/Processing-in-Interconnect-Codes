@@ -1,1 +1,1 @@
-# Processing-in-Interconnect-Codes
+# Processing-in-Interconnect-Computing Paradigm
