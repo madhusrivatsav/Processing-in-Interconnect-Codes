@@ -2,12 +2,12 @@ from torch import nn
 from torch.nn import functional as F
 import os
 import sys
-current_dir = "/home/madhu/TEMP_FINAL_CODES"  #path of your current directory
-layer_dir = os.path.join(current_dir, 'TEMP_Layers')
+current_dir = ""  #path of your current directory
+layer_dir = os.path.join(current_dir, 'PI2_Layers')
 sys.path.append(layer_dir)
 print(layer_dir)
-from TEMP_FC_in import  MPLayer_in_opt,MPLayer_in_K
-from TEMP_CONV_in import Temp_conv,temp_conv_k_opt,Temp_conv_K
+from PI2_FC_in import  MPLayer_in_K
+from PI2_CONV_in import temp_conv_k_opt
 
 # LeNet-5 conventional Model 
 class LeNet5(nn.Module):
