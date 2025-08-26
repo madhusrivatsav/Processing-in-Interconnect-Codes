@@ -29,8 +29,8 @@ class MPLayer_in_K(torch.nn.Module):
       inputp = torch.unsqueeze(inputp,axis=-1)
       self.weight.type_as(inputp)
       if(inputn==None):
-        plusIn =((3+inputp))
-        minusIn =((3-inputp))
+        plusIn =F.relu((3+inputp))
+        minusIn =F.relu((3-inputp))
       else:
         minusIn = torch.unsqueeze(inputn,axis=-1)
         plusIn = inputp
