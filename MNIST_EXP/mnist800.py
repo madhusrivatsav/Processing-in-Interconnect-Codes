@@ -90,8 +90,8 @@ np.random.seed(42)
 
 # Load MNIST dataset
 transform = transforms.ToTensor()
-train_dataset = datasets.MNIST(root='/home/madhu/TEMP_FINAL_CODES/Datasets', train=True, transform=transform, download=True)
-test_dataset = datasets.MNIST(root='/home/madhu/TEMP_FINAL_CODES/Datasets', train=False, transform=transform, download=True)
+train_dataset = datasets.MNIST(root='Datasets', train=True, transform=transform, download=True)
+test_dataset = datasets.MNIST(root='Datasets', train=False, transform=transform, download=True)
 
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
@@ -102,7 +102,7 @@ hidden_dim = 800
 output_dim = 10
 lr = 0.1
 epochs = 30
-device = "cuda:4"
+device = "cuda:0"
 # Initialize weights (manual)
 W1 = torch.randn((hidden_dim, input_dim), device=device) * 0.01
 W2 = torch.randn((output_dim, hidden_dim), device=device) * 0.01
