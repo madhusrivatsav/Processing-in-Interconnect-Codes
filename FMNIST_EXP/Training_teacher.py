@@ -11,7 +11,7 @@ import sys
 import time
 
 # ────────────────────── Setup and Paths ──────────────────────
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+current_dir = "" ##path to current directory
 arch_dir = os.path.join(current_dir, 'network_arch')
 result_dir = os.path.join(current_dir, 'Trained_models')
 
@@ -104,7 +104,7 @@ def main():
         _, acc = evaluate(fabric, model, test_loader)
         if acc > best_acc:
             best_acc = acc
-            torch.save(model.state_dict(), os.path.join(result_dir, "fmnist_lenet5.pt"))
+            torch.save(model.state_dict(), os.path.join(result_dir, "FMNIST/fmnist_lenet5.pt"))
             print(f"✔ Best model saved with accuracy: {best_acc:.2f}%")
 
     # ───── Final reporting ─────
