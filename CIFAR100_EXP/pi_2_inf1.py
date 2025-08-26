@@ -1,107 +1,114 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
-from torchvision.datasets import  CIFAR100
-from lightning.fabric import Fabric, seed_everything
-from torchmetrics.classification import Accuracy
 import os
 import sys
 import time
+import argparse
 import numpy as np
+import torch
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import DataLoader
+from torchvision.datasets import CIFAR100
+import torchvision.transforms as tt
+from lightning.fabric import Fabric, seed_everything
+from torchmetrics.classification import Accuracy
 
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+# ───────────── Argument Parser ─────────────
+parser = argparse.ArgumentParser(description="Evaluate quantized ResNet9 with temp noise on CIFAR10")
+parser.add_argument("--current_dir", type=str, default= "/home/madhu/TEMP_FINAL_CODES", help="Path to dataset directory")
+parser.add_argument("--data_dir", type=str, required=True, help="Path to dataset directory")
+parser.add_argument("--checkpoint", type=str, required=True, help="Path to student model checkpoint (.pt)")
+parser.add_argument("--n_bits", type=int, default=4, help="Number of bits for symmetric quantization")
+parser.add_argument("--std", type=float, default=0.0, help="Standard deviation of additive noise in temp blocks")
+parser.add_argument("--device_ids", type=int, nargs='+', default=[0], help="CUDA device IDs for Fabric")
+parser.add_argument("--batch_size", type=int, default=16, help="Batch size for evaluation")
+args = parser.parse_args()
+
+# ───────────── Path Setup ─────────────
+current_dir = args.current_dir
 print(current_dir)
 arch_dir = os.path.join(current_dir, 'network_arch')
 sys.path.append(arch_dir)
-print(arch_dir)
-result_dir = os.path.join(current_dir, 'Trained_models')
-print(result_dir)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-torch.manual_seed(3407)
+data_dir = os.path.join(current_dir, 'Datasets')
+sys.path.append(data_dir)
+
 from resnet_9 import ResNet9_100_temp_noise
-import numpy as np
 
+# ───────────── Cutout Augmentation ─────────────
+class Cutout(object):
+    def __init__(self, n_holes, length):
+        self.n_holes = n_holes
+        self.length = length
 
-# Function to register hooks and store gradients
-def distillation_loss(student_logits, teacher_logits, labels, temperature, alpha):
-    # Soft targets from teacher and student
-    teacher_probs = F.softmax(teacher_logits / temperature, dim=1)
-    student_probs = F.log_softmax(student_logits / temperature, dim=1)
-    
-    # Distillation loss (soft cross-entropy)
-    distillation_loss = F.kl_div(student_probs, teacher_probs, reduction='batchmean') * (temperature**2)
-    
-    # Classification loss (hard cross-entropy)
-    classification_loss = F.cross_entropy(student_logits, labels)
-    
-    # Combined loss
-    return alpha * distillation_loss + (1 - alpha) * classification_loss
+    def __call__(self, img):
+        h, w = img.size(1), img.size(2)
+        mask = np.ones((h, w), np.float32)
+        for _ in range(self.n_holes):
+            y, x = np.random.randint(h), np.random.randint(w)
+            y1, y2 = np.clip([y - self.length // 2, y + self.length // 2], 0, h)
+            x1, x2 = np.clip([x - self.length // 2, x + self.length // 2], 0, w)
+            mask[y1:y2, x1:x2] = 0.
+        return img * torch.from_numpy(mask).expand_as(img)
 
-def evaluate(fabric, model, test_loader):
+# ───────────── Symmetric Quantization ─────────────
+def symmetric_quantize(tensor, n_bits=4):
+    qmax = 2**(n_bits - 1) - 1
+    abs_max = tensor.abs().max()
+    scale = abs_max / qmax
+    q_tensor = (tensor / scale).round().clamp(-qmax, qmax)
+    return q_tensor * scale
+
+# ───────────── Evaluation Function ─────────────
+def evaluate(fabric, model, dataloader):
     model.eval()
-    test_loss = 0
+    loss = 0
     accuracy = Accuracy(task="multiclass", num_classes=100).to(fabric.device)
-
     with torch.no_grad():
-        for data, target in test_loader:
+        for data, target in dataloader:
             output = model(data)
-            test_loss += F.nll_loss(output, target, reduction="sum").item()
-            accuracy(output, target)
-
-    test_loss /= len(test_loader.dataset)
+            loss += F.nll_loss(output, target, reduction="sum").item()
+            accuracy.update(output, target)
+    avg_loss = loss / len(dataloader.dataset)
     acc = accuracy.compute().item() * 100
+    print(f"\nTest set: Average loss: {avg_loss:.4f}, Accuracy: {acc:.2f}%\n")
+    return avg_loss, acc
 
-    print(f"\nTest set: Average loss: {test_loss:.4f}, Accuracy: {acc:.2f}%\n")
-    return test_loss, acc
-
+# ───────────── Main Function ─────────────
 def main():
-    fabric = Fabric(accelerator="cuda", devices=4, strategy="ddp", precision="16-mixed")
+    fabric = Fabric(accelerator="cuda", devices=[4,5], strategy="ddp", precision="16-mixed")
     fabric.launch()
+    seed_everything(42)
 
-    seed_everything(60)
-    import torchvision.transforms as tt
+    # Transforms
     stats = ((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))
-    train_transform = tt.Compose([tt.RandomCrop(32, padding=4, padding_mode='reflect'), 
-                         tt.RandomHorizontalFlip(), 
-                         tt.ToTensor(), 
-                         tt.Normalize(*stats,inplace=True)])
-    test_transform = tt.Compose([tt.ToTensor(), tt.Normalize(*stats)])
-    PATH_DATASETS = "/home/madhu/TEMP_FINAL_CODES/Datasets"
-   
-    train_dataset = CIFAR100(PATH_DATASETS, train=True, download=True,transform=train_transform)
-    test_dataset = CIFAR100(PATH_DATASETS, train=False, download=True, transform=test_transform)
-    batch_size = 16
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
-    train_loader, test_loader = fabric.setup_dataloaders(train_loader, test_loader)
-    
-    # device = "cuda"
-    #student network
-    gamma = [10,50,55,65,100,100,80,250,50] #(16,50,55,65,60,80,90,200,50) #
-    # model = ResNet9_100_temp1(3,out=100,gamma=gamma,temp0=True,temp1=True,temp2=True,temp3=True,temp4=True,temp5=True,temp6=True,temp7=True,temp8=True)
-    model = ResNet9_100_temp_noise(3,out=100,gamma=gamma,temp0=True,temp1=True,temp2=True,temp3=True,temp4=True,temp5=True,temp6=True,temp7=True,temp8=True)
-    model = model.to(device)
-    model.load_state_dict(torch.load("/home/madhu/TEMP_FINAL_CODES/CIFAR100/Trained_models/ResNet9_cifar100_k_new_new.pt"))
+    test_transform = tt.Compose([
+        tt.ToTensor(),
+        tt.Normalize(*stats)
+    ])
+    test_dataset = CIFAR100(data_dir, train=False, download=True, transform=test_transform)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4)
+    test_loader = fabric.setup_dataloaders(test_loader)
 
+    # Instantiate model
+    gamma = [10,50,55,65,100,100,80,250,50]
+    model = ResNet9_100_temp_noise(
+        3, out=100, gamma=gamma, std=args.std,
+        temp0=True, temp1=True, temp2=True, temp3=True,
+        temp4=True, temp5=True, temp6=True, temp7=True, temp8=True
+    ).to(fabric.device)
 
-    epochs = 60
-    lr = 1e-2
-    accmax = 0
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-7) #changing the wt decay from 1e-4 (89.66)
-    sched = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=lr, epochs=epochs,steps_per_epoch=len(train_loader),pct_start=0.35) #0.4
-    model, optimizer = fabric.setup(model, optimizer)
+    model.load_state_dict(torch.load(args.checkpoint))
+
+    # Apply quantization
+    with torch.no_grad():
+        for name, param in model.named_parameters():
+            param.data.copy_(symmetric_quantize(param.data, n_bits=args.n_bits))
+
+    model = fabric.setup(model)
     start = time.time()
-    print('timing started')
-    total_params = sum(p.numel() for p in model.parameters())
-    print(f"Number of parameters: {total_params}")
+    print("Starting Evaluation...")
     evaluate(fabric, model, test_loader)
 
-
+    print(f"Evaluation completed in {(time.time() - start) / 60:.2f} minutes")
 
 if __name__ == "__main__":
     main()
-    
- 
