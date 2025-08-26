@@ -4,12 +4,12 @@ import sys
 import os
 import torch
 
-current_dir = "/home/madhu/TEMP_FINAL_CODES"  #path of the current directory
-layer_dir = os.path.join(current_dir, 'TEMP_Layers')
+current_dir = ""  #path of the current directory
+layer_dir = os.path.join(current_dir, 'PI2_Layers')
 sys.path.append(layer_dir)
 print(layer_dir)
-from TEMP_CONV_in import temp_conv_k_opt
-from TEMP_FC_in import MPLayer_in_K
+from PI2_CONV_in import temp_conv_k_opt
+from PI2_FC_in import MPLayer_in_K
 
 
 def conv_block(in_channels, out_channels, pool=False):
