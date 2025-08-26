@@ -1,1 +1,4 @@
-
+Lightweight PyTorch layers for π² (processing-in-interconnect) neural networks.
+This folder provides implementations of a convolutional PI@ layer and a fully-connected PI2 layer.
+PI2_CONV_in.py – PI2 convolution layer(s)
+PI2_FC_in.py – PI2 fully-connected layer(s)
