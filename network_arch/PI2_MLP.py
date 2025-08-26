@@ -4,8 +4,8 @@ from torch.nn import functional as F
 import os
 import sys
 
-current_dir = "/home/madhu/TEMP_FINAL_CODES" ##path of your current directory
-layer_dir = os.path.join(current_dir, 'TEMP_Layers')
+current_dir = "" ##path of your current directory
+layer_dir = os.path.join(current_dir, 'PI2_Layers')
 sys.path.append(layer_dir)
 print(layer_dir)
 from TEMP_FC_in import MPLayer_in_K
