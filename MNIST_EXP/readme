@@ -1,17 +1,19 @@
 
 This directory contains PyTorch/Fabric training scripts and notebooks for experimenting with π² (processing-in-interconnect) networks and their relationship to conventional MLPs on the MNIST dataset.
-fabric_MLP.py
-Baseline training script: trains a 3-layer conventional MLP on MNIST using the PyTorch Lightning Fabric
- framework.
+In all  these files, mention the path of the current directory where you copy the repository before running the codes. 
 
-fabric_mlp_kk_1.py
+1. fabric_MLP.py
+Baseline training script: trains a 3-layer conventional MLP on MNIST using the PyTorch Lightning Fabric
+framework.
+
+2. fabric_PI2_1.py
 Trains a π² network with K=1 constraints applied in both the hidden and output layers, mimicking strict TTFS coding.
 
-fabric_mlp_kk_hidden_1.py
+3. fabric_PI2_hidden_1.py
 Trains a π² network with K=1 constraint only in the hidden layer, while allowing flexible K at the output layer.
 
-mnist800.py
+4. mnist800_PI2.py
 Fabric-based training of a large π² network with architecture 784–800–10 (input → hidden → output) on MNIST.
 
-kth_neuron_model_can_learn_mnist.ipynb
+5. PI2_neuron_model_can_learn_mnist.ipynb
 Jupyter notebook analyzing the relationship between π² neurons and conventional MAC-based neurons, showing how π²-K models approximate inner-product computations.
