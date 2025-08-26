@@ -1,1 +1,19 @@
+This directory contains scripts for training and comparing conventional MAC-based LeNet-5 networks with π²-based LeNet-5 architectures on the Fashion-MNIST dataset.
 
+Training_teacher.py
+Baseline training of a conventional MAC-based LeNet-5 network on Fashion-MNIST.
+Used as a teacher model for comparison and potential distillation.
+
+pi_2_train.py
+Trains a π²-based LeNet-5 network (TEMP neuron replacements) on Fashion-MNIST.
+Evaluates accuracy, convergence, and energy-efficiency compared to the teacher.
+
+pi_2_constrain_K.py
+Trains π² LeNet-5 networks with K-constraints:
+
+K=1 → strict TTFS mode (single earliest spike propagation).
+
+K=10 → more flexible approximation, enabling richer representations.
+
+readme
+(This file) Documentation for navigating and using the experiments.
