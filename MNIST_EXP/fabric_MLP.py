@@ -111,7 +111,7 @@ def main():
     evaluate(fabric, model, test_loader)
 
     # Save trained model
-    save_path = os.path.join(result_dir, "mnist_mlp_100.pt")
+    save_path = os.path.join(result_dir, "MNIST/mnist_mlp_100.pt")
     torch.save(model.state_dict(), save_path)
     print(f"Model saved to {save_path}")
 
