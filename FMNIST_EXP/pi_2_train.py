@@ -13,7 +13,7 @@ import time
 import numpy as np
 
 # ──────────────────────── Path Configuration ────────────────────────
-current_dir = "/home/madhu/TEMP_FINAL_CODES"
+current_dir = "" ##path to current directory
 arch_dir = os.path.join(current_dir, 'network_arch')
 result_dir = os.path.join(current_dir, 'Trained_models')
 
@@ -190,7 +190,7 @@ def main():
         # Save best-performing model
         if acc > accmax:
             accmax = acc
-            torch.save(model.state_dict(), os.path.join(result_dir, "FMNIST/fmnist_kk_topk_no_wt.pt"))
+            torch.save(model.state_dict(), os.path.join(result_dir, "FMNIST/fmnist_kk_5.pt"))
             print(f"✔ Model saved with best accuracy: {acc:.2f}%")
 
     # ───── Final Evaluation ─────
