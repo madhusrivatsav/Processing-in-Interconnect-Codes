@@ -130,7 +130,7 @@ def main():
         # Save best model
         if test_acc > best_acc:
             best_acc = test_acc
-            save_path = os.path.join(result_dir, "MNIST/mnist_kk_500.pt")
+            save_path = os.path.join(result_dir, "MNIST/mnist_kk_500_1.pt")
             torch.save(student_model.state_dict(), save_path)
 
     # Training summary
